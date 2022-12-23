@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/PeemPeimn/assessment/expenses"
 	"github.com/labstack/echo/v4"
@@ -31,8 +35,22 @@ func main() {
 
 	echoInstance.POST("/expenses", expenses.CreateExpensesHandler)
 
-	log.Printf("Server started at :%s\n", os.Getenv("PORT"))
-	log.Fatal(echoInstance.Start(os.Getenv("PORT")))
-	log.Println("bye bye!")
+	// Start server
+	go func() {
+		if err := echoInstance.Start(os.Getenv("PORT")); err != nil && err != http.ErrServerClosed {
+			echoInstance.Logger.Fatal("Shutting down the server.")
+		}
+	}()
+
+	// Gracefully shut down after interrupt signal is triggered with a 10-second timeout.
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
+	<-shutdown
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := echoInstance.Shutdown(ctx); err != nil {
+		echoInstance.Logger.Fatal(err)
+	}
+	log.Println("Shut down gracefully.")
 
 }

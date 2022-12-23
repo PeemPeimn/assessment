@@ -7,6 +7,8 @@ import (
 	"github.com/lib/pq"
 )
 
+// Expense is a struct used to represent an expense JSON response.
+// Expense consists of fields below according to the database's table.
 type Expense struct {
 	ID     int      `json:"id"`
 	Title  string   `json:"title"`
@@ -15,10 +17,14 @@ type Expense struct {
 	Tags   []string `json:"tags"`
 }
 
+// ErrorResponse represents an error in a JSON response.
 type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
+// CreateExpensesHandler handles HTTP POST request to create a new expense.
+// This function receives echo.Context as a parameter
+// and returns a JSON response with status code.
 func CreateExpensesHandler(c echo.Context) error {
 
 	var expense Expense

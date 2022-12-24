@@ -13,7 +13,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// const url = "postgres://zqeqtlwd:LLscEWb4NlEdGxpj9Q4lN5h6zumLy6R6@tiny.db.elephantsql.com/zqeqtlwd"
 const url = "postgresql://root:root@db/it-db?sslmode=disable"
 
 func TestITCreateExpense(t *testing.T) {

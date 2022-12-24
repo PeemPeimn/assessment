@@ -21,7 +21,7 @@ func authorizationHandler(next echo.HandlerFunc) echo.HandlerFunc {
 		if auth == "November 10, 2009" {
 			return next(c)
 		}
-		return c.JSON(http.StatusUnauthorized, "Invalid key value.")
+		return c.JSON(http.StatusUnauthorized, "invalid key value.")
 	}
 }
 
@@ -36,12 +36,12 @@ func main() {
 	// Use the customized handler.
 	echoInstance.Use(authorizationHandler)
 
-	echoInstance.POST("/expenses", handler.CreateExpenses)
+	echoInstance.POST("/expenses", handler.CreateExpense)
 
 	// Start server
 	go func() {
 		if err := echoInstance.Start(os.Getenv("PORT")); err != nil && err != http.ErrServerClosed {
-			echoInstance.Logger.Fatal("Shutting down the server.")
+			echoInstance.Logger.Fatal("shutting down the server.")
 		}
 	}()
 
@@ -54,6 +54,6 @@ func main() {
 	if err := echoInstance.Shutdown(ctx); err != nil {
 		echoInstance.Logger.Fatal(err)
 	}
-	log.Println("Shut down gracefully.")
+	log.Println("shut down gracefully.")
 
 }

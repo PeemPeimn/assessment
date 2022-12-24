@@ -10,7 +10,7 @@ import (
 
 type (
 
-	// Handler contains a DB connection 
+	// Handler contains a DB connection
 	// and has handling method for requests.
 	Handler struct {
 		DB *sql.DB
@@ -35,7 +35,7 @@ type (
 // CreateExpensesHandler handles HTTP POST request to create a new expense.
 // This function receives echo.Context as a parameter
 // and returns a JSON response with status code.
-func (handler Handler) CreateExpenses(c echo.Context) error {
+func (handler Handler) CreateExpense(c echo.Context) error {
 
 	var expense Expense
 
@@ -43,7 +43,7 @@ func (handler Handler) CreateExpenses(c echo.Context) error {
 
 	if err != nil {
 		return c.JSON(http.StatusBadRequest,
-			ErrorResponse{Message: "Cannot unmarshal request's body." + err.Error()})
+			ErrorResponse{Message: "cannot unmarshal request's body. " + err.Error()})
 	}
 
 	row := handler.DB.QueryRow(`
@@ -55,7 +55,7 @@ func (handler Handler) CreateExpenses(c echo.Context) error {
 	err = row.Scan(&expense.ID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError,
-			ErrorResponse{Message: "Cannot create the expense." + err.Error()})
+			ErrorResponse{Message: "cannot create the expense. " + err.Error()})
 	}
 
 	return c.JSON(http.StatusCreated, expense)

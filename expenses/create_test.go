@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateExpenses(t *testing.T) {
+func TestCreateExpense(t *testing.T) {
 
 	// Arrange
 	db, mock, err := sqlmock.New()
@@ -43,7 +43,7 @@ func TestCreateExpenses(t *testing.T) {
 	handler := Handler{DB: db}
 
 	// Act
-	handler.CreateExpenses(c)
+	handler.CreateExpense(c)
 
 	// Assert
 	assert.Equal(t, http.StatusCreated, rec.Code)

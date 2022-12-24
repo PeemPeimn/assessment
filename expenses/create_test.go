@@ -27,11 +27,13 @@ func TestCreateExpenses(t *testing.T) {
 	e := echo.New()
 
 	mockJson := []byte(`{
-	  "title": "smoothie",
+		"title": "smoothie",
 	  "amount": 79,
 	  "note": "abcd",
 	  "tags": ["food", "beverage"]
-	}`)
+		}`)
+
+	expected := `{"id":1,"title":"smoothie","amount":79,"note":"abcd","tags":["food","beverage"]}`
 
 	req := httptest.NewRequest(http.MethodPost, "/expenses", bytes.NewBuffer(mockJson))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -42,8 +44,6 @@ func TestCreateExpenses(t *testing.T) {
 
 	// Act
 	handler.CreateExpenses(c)
-
-	expected := `{"id":1,"title":"smoothie","amount":79,"note":"abcd","tags":["food","beverage"]}`
 
 	// Assert
 	assert.Equal(t, http.StatusCreated, rec.Code)

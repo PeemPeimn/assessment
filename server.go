@@ -26,14 +26,17 @@ func authorizationHandler(next echo.HandlerFunc) echo.HandlerFunc {
 }
 
 func main() {
-	expenses.InitDB()
+
+	db := expenses.InitDB(os.Getenv("DATABASE_URL"))
+
+	handler := expenses.Handler{DB: db}
 
 	echoInstance := echo.New()
 
 	// Use the customized handler.
 	echoInstance.Use(authorizationHandler)
 
-	echoInstance.POST("/expenses", expenses.CreateExpensesHandler)
+	echoInstance.POST("/expenses", handler.CreateExpenses)
 
 	// Start server
 	go func() {

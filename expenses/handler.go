@@ -3,6 +3,7 @@ package expenses
 import (
 	"database/sql"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/lib/pq"
@@ -77,7 +78,17 @@ func (handler Handler) GetExpenseByID(c echo.Context) error {
 
 	var expense Expense
 
-	err = row.Scan(&expense.ID, &expense.Title, &expense.Amount, &expense.Note, &expense.Tags)
+	// Postgres driver returns an array as []uint8
+	var tags []uint8
+
+	err = row.Scan(&expense.ID, &expense.Title, &expense.Amount, &expense.Note, &tags)
+
+	// Convert []uint8 to []string
+	// by converting []uint8 to bytes then
+	// trimming {}, lastly split by ","
+	tagsString := string([]byte(tags))
+	tagsString = strings.Trim(tagsString, "{}")
+	expense.Tags = strings.Split(tagsString, ",")
 
 	switch err {
 

@@ -37,6 +37,7 @@ func main() {
 	echoInstance.Use(authorizationHandler)
 
 	echoInstance.POST("/expenses", handler.CreateExpense)
+	echoInstance.GET("/expenses/:id", handler.GetExpenseByID)
 
 	// Start server
 	go func() {

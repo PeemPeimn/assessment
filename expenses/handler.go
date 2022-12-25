@@ -2,6 +2,7 @@ package expenses
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -59,4 +60,13 @@ func (handler Handler) CreateExpense(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, expense)
+}
+
+func (handler Handler) GetExpenseByID(c echo.Context) error {
+
+	id := c.Param("id")
+
+	log.Println(id)
+
+	return nil
 }

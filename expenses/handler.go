@@ -2,7 +2,6 @@ package expenses
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -66,7 +65,31 @@ func (handler Handler) GetExpenseByID(c echo.Context) error {
 
 	id := c.Param("id")
 
-	log.Println(id)
+	stmt, err := handler.DB.
+		Prepare("SELECT id, title, amount, note, tags FROM expenses WHERE id=$1")
 
-	return nil
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError,
+			ErrorResponse{"cannot prepare query statement. " + err.Error()})
+	}
+
+	row := stmt.QueryRow(id)
+
+	var expense Expense
+
+	err = row.Scan(&expense.ID, &expense.Title, &expense.Amount, &expense.Note, &expense.Tags)
+
+	switch err {
+
+	case sql.ErrNoRows:
+		return c.JSON(http.StatusInternalServerError,
+			ErrorResponse{"cannot find the expense of that id. " + err.Error()})
+
+	case nil:
+		return c.JSON(http.StatusOK, expense)
+
+	default:
+		return c.JSON(http.StatusInternalServerError,
+			ErrorResponse{"cant unmarshal query result. " + err.Error()})
+	}
 }

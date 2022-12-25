@@ -3,7 +3,6 @@ package expenses
 import (
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -11,22 +10,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetOneExpense(t *testing.T) {
+func TestGetOneExpenseNotFound(t *testing.T) {
 	// Arrange
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 
-	newsMockRows := sqlmock.
-		NewRows([]string{"id", "title", "amount", "note", "tags"}).
-		AddRow(1, "smoothie", 99, "unit_test", `["food", "beverage"]`)
+	// Expect no rows
+	newsMockRows := sqlmock.NewRows([]string{"id", "title", "amount", "note", "tags"})
 
-	mock.ExpectQuery("SELECT * FROM expenses WHERE id=?").
-		WithArgs(1).
+	mock.ExpectPrepare("SELECT (.+) FROM expenses WHERE id=?").
+		ExpectQuery().
+		WithArgs("1").
 		WillReturnRows(newsMockRows)
-
-	expected := `{"id":1,"title":"smoothie","amount":79,"note":"abcd","tags":["food","beverage"]}`
 
 	req := httptest.NewRequest(http.MethodGet, "/expenses/1", nil)
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -43,6 +40,5 @@ func TestGetOneExpense(t *testing.T) {
 	handler.GetExpenseByID(c)
 
 	// Assert
-	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, expected, strings.TrimSpace(rec.Body.String()))
+	assert.Equal(t, http.StatusInternalServerError, rec.Code)
 }

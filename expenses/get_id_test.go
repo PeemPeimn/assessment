@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetOneExpense(t *testing.T) {
+func TestGetExpenseByID(t *testing.T) {
 	// Arrange
 	db, mock, err := sqlmock.New()
 	if err != nil {
@@ -49,7 +49,7 @@ func TestGetOneExpense(t *testing.T) {
 	assert.Equal(t, expected, strings.TrimSpace(rec.Body.String()))
 }
 
-func TestGetOneExpenseNotFound(t *testing.T) {
+func TestGetExpenseByIDNotFound(t *testing.T) {
 	// Arrange
 	db, mock, err := sqlmock.New()
 	if err != nil {

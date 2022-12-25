@@ -3,6 +3,7 @@ package expenses
 import (
 	"database/sql"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/lib/pq"
@@ -59,4 +60,47 @@ func (handler Handler) CreateExpense(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, expense)
+}
+
+func (handler Handler) GetExpenseByID(c echo.Context) error {
+
+	id := c.Param("id")
+
+	stmt, err := handler.DB.
+		Prepare("SELECT id, title, amount, note, tags FROM expenses WHERE id=$1")
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError,
+			ErrorResponse{"cannot prepare query statement. " + err.Error()})
+	}
+
+	row := stmt.QueryRow(id)
+
+	var expense Expense
+
+	// Postgres driver returns an array as []uint8
+	var tags []uint8
+
+	err = row.Scan(&expense.ID, &expense.Title, &expense.Amount, &expense.Note, &tags)
+
+	// Convert []uint8 to []string
+	// by converting []uint8 to bytes then
+	// trimming {}, lastly split by ","
+	tagsString := string([]byte(tags))
+	tagsString = strings.Trim(tagsString, "{}")
+	expense.Tags = strings.Split(tagsString, ",")
+
+	switch err {
+
+	case sql.ErrNoRows:
+		return c.JSON(http.StatusInternalServerError,
+			ErrorResponse{"cannot find the expense of that id. " + err.Error()})
+
+	case nil:
+		return c.JSON(http.StatusOK, expense)
+
+	default:
+		return c.JSON(http.StatusInternalServerError,
+			ErrorResponse{"cant unmarshal query result. " + err.Error()})
+	}
 }

@@ -2,6 +2,7 @@ package expenses
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 	"strings"
 
@@ -87,8 +88,14 @@ func (handler Handler) GetExpenseByID(c echo.Context) error {
 	// by converting []uint8 to bytes then
 	// trimming {}, lastly split by ","
 	tagsString := string([]byte(tags))
-	tagsString = strings.Trim(tagsString, "{}")
-	expense.Tags = strings.Split(tagsString, ",")
+	log.Println(tagsString)
+
+	if tagsString == "{}" || tagsString == "" {
+		expense.Tags = nil
+	} else {
+		tagsString = strings.Trim(tagsString, "{}")
+		expense.Tags = strings.Split(tagsString, ",")
+	}
 
 	switch err {
 

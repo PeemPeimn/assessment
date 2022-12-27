@@ -45,7 +45,7 @@ func TestCreateExpense(t *testing.T) {
 	handler := Handler{DB: db}
 
 	// Act
-	handler.PutExpense(c)
+	handler.CreateExpense(c)
 
 	// Assert
 	assert.Equal(t, http.StatusCreated, rec.Code)

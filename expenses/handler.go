@@ -2,7 +2,6 @@ package expenses
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"strings"
 
@@ -56,7 +55,7 @@ func (handler Handler) CreateExpense(c echo.Context) error {
 
 	err = row.Scan(&expense.ID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError,
+		return c.JSON(http.StatusInternalServerError,
 			ErrorResponse{Message: "cannot create the expense. " + err.Error()})
 	}
 
@@ -88,7 +87,7 @@ func (handler Handler) GetExpenseByID(c echo.Context) error {
 	// by converting []uint8 to bytes then
 	// trimming {}, lastly split by ","
 	tagsString := string([]byte(tags))
-	log.Println(tagsString)
+	// log.Println(tagsString)
 
 	if tagsString == "{}" || tagsString == "" {
 		expense.Tags = nil
@@ -113,5 +112,56 @@ func (handler Handler) GetExpenseByID(c echo.Context) error {
 }
 
 func (handler Handler) PutExpense(c echo.Context) error {
-	return nil
+
+	var expense Expense
+
+	err := c.Bind(&expense)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest,
+			ErrorResponse{Message: "cannot read request's body. " + err.Error()})
+	}
+
+	id := c.Param("id")
+
+	// id_str := c.Param("id")
+	// id, err := strconv.Atoi(id_str)
+	// if err != nil {
+	// 	return c.JSON(http.StatusBadRequest,
+	// 		ErrorResponse{Message: "can't convert id to int" + err.Error()})
+	// }
+	// expense.ID = int(id)
+
+	stmt, err := handler.DB.Prepare(`
+		UPDATE expenses 
+		SET title=$2, amount=$3, note=$4, tags=$5  
+		WHERE id = $1
+		RETURNING id, title, amount, note, tags`)
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError,
+			ErrorResponse{Message: "cannot prepare update one user statement. " + err.Error()})
+	}
+
+	row := stmt.QueryRow(id, expense.Title, expense.Amount, expense.Note, pq.Array(expense.Tags))
+
+	var tags []uint8
+
+	err = row.Scan(&expense.ID, &expense.Title, &expense.Amount, &expense.Note, &tags)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError,
+			ErrorResponse{Message: "cannot update user. " + err.Error()})
+	}
+
+	tagsString := string([]byte(tags))
+	// log.Println(tagsString)
+
+	if tagsString == "{}" || tagsString == "" {
+		expense.Tags = nil
+	} else {
+		tagsString = strings.Trim(tagsString, "{}")
+		expense.Tags = strings.Split(tagsString, ",")
+	}
+
+	return c.JSON(http.StatusOK, expense)
 }

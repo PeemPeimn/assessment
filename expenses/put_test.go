@@ -25,7 +25,8 @@ func TestPutExpense(t *testing.T) {
 		NewRows([]string{"id", "title", "amount", "note", "tags"}).
 		AddRow(1, "smoothie", 99, "unit_test", `{put_test,beverage}`)
 
-	mock.ExpectQuery("INSERT INTO expenses .*").WithArgs().WillReturnRows(newsMockRows)
+	mock.ExpectPrepare("UPDATE expenses (.+) WHERE (.+) RETURNING (.+)").
+		ExpectQuery().WithArgs().WillReturnRows(newsMockRows)
 
 	mockJson := []byte(`{
 		"title": "smoothie",

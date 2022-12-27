@@ -39,11 +39,13 @@ func TestCreateExpense(t *testing.T) {
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
+	c.SetParamNames("id")
+	c.SetParamValues("1")
 
 	handler := Handler{DB: db}
 
 	// Act
-	handler.CreateExpense(c)
+	handler.PutExpense(c)
 
 	// Assert
 	assert.Equal(t, http.StatusCreated, rec.Code)

@@ -111,3 +111,7 @@ func (handler Handler) GetExpenseByID(c echo.Context) error {
 			ErrorResponse{"cant unmarshal query result. " + err.Error()})
 	}
 }
+
+func (handler Handler) PutExpense(c echo.Context) error {
+	return nil
+}

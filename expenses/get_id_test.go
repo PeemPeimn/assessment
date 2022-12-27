@@ -18,7 +18,6 @@ func TestGetExpenseByID(t *testing.T) {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 
-	// Expect no rows
 	newsMockRows := sqlmock.
 		NewRows([]string{"id", "title", "amount", "note", "tags"}).
 		AddRow(1, "smoothie", 79, "unit_test", `{food,beverage}`)

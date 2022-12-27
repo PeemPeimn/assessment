@@ -38,6 +38,7 @@ func main() {
 
 	echoInstance.POST("/expenses", handler.CreateExpense)
 	echoInstance.GET("/expenses/:id", handler.GetExpenseByID)
+	echoInstance.PUT("/expenses/:id", handler.PutExpense)
 
 	// Start server
 	go func() {

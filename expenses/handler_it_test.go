@@ -1,5 +1,3 @@
-//go:build integration
-
 package expenses
 
 import (
@@ -162,4 +160,66 @@ func TestITPutExpense(t *testing.T) {
 	assert.Equal(t, expected.Amount, got.Amount)
 	assert.Equal(t, expected.Note, got.Note)
 	assert.Equal(t, expected.Tags, got.Tags)
+}
+
+func TestITGetAllExpenses(t *testing.T) {
+
+	// Arrange
+	db := InitDB(url)
+
+	handler := Handler{DB: db}
+
+	_, err := handler.DB.Exec("DELETE FROM expenses")
+	if err != nil {
+		t.Fatal("cannot clear database for testing. " + err.Error())
+	}
+
+	req := httptest.NewRequest(http.MethodPut, "/expenses", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	e := echo.New()
+	c := e.NewContext(req, rec)
+
+	mockExpenses := []Expense{
+		{0, "mocha", 99, "mock_get", []string{"abcd", "efgh"}},
+		{0, "latte", 88, "mock_get", []string{"ijkl", "mnop"}},
+		{0, "espresso", 77, "mock_get", []string{"qrst", "uvwx"}},
+	}
+
+	for i := range mockExpenses {
+		row := handler.DB.QueryRow(`
+			INSERT INTO expenses (title, amount, note, tags) 
+			values ($1, $2, $3, $4) 
+			RETURNING id
+		`, mockExpenses[i].Title, mockExpenses[i].Amount, mockExpenses[i].Note, pq.Array(mockExpenses[i].Tags))
+
+		err := row.Scan(&mockExpenses[i].ID)
+		if err != nil {
+			t.Fatal("cannot create mock expense.")
+		}
+	}
+	// t.Log(mockExpenses)
+
+	gotList := []Expense{}
+
+	// Act
+	handler.GetAllExpenses(c)
+
+	responseJson := rec.Body.String()
+
+	json.Unmarshal([]byte(responseJson), &gotList)
+	// t.Log(gotList)
+
+	// Assert
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	for i, expected := range mockExpenses {
+		got := gotList[i]
+
+		assert.Equal(t, expected.ID, got.ID)
+		assert.Equal(t, expected.Title, got.Title)
+		assert.Equal(t, expected.Amount, got.Amount)
+		assert.Equal(t, expected.Note, got.Note)
+		assert.Equal(t, expected.Tags, got.Tags)
+	}
 }

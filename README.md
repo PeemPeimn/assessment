@@ -1,183 +1,29 @@
-# Prerequisites
-* โปรเจคตั้งต้นคือ[โปรเจคนี้](https://github.com/KKGo-Software-engineering/assessment)
-* กำหนดให้ส่งลิ้งค์คำตอบคือ github repository ที่เก็บโค้ดของคุณ `https://github.com/<your github name>/assessment`
-* *MUST* use go module
-* *MUST* use PostgreSQL
-* *NEED* to create table named `expenses` when start the application if not exist
-* *MUST* use go module `go mod init github.com/<your github name>/assessment`
-* *MUST* use go 1.18 or above
-* api port *MUST* get from environment variable name `PORT` (should be able to config for api start from port `:2565`)
-* database url *MUST* get from environment variable name `DATABASE_URL`
+# Assessment
 
-## Business Requirements
-* Expense tracking system
-- ให้สร้างระบบ REST API เพื่อจัดเก็บประวัติการใช้จ่าย (expense) ของลูกค้าธนาคาร ซึ่งความสามารถระบบมีดังนี้
-- ระบบสามารถจัดเก็บข้อมูล เรื่อง(title), ยอดค่าใช้จ่าย(amount), บันทึกย่อ(note) และ หมวดหมู่(tags)
-- ระบบสามารถเพิ่มประวัติการใช้จ่ายใหม่ได้
-- ระบบสามารถปรับเปลี่ยน/แก้ไข ข้อมูลของการใช้จ่ายได้
-- ระบบสามารถดึงข้อมูลการใช้จ่ายทั้งหมดออกมาแสดงได้
-- ระบบสามารถดึงข้อมูลการใช้จ่ายทีละรายการได้
+This is a public repository for KBTG Go Software Engineering Bootcamp's post-test assessment.
 
-## User Stories
-### Story: EXP01
-	* As a user, I want to add a new expense So that I can track my expenses
-	* ในฐานะผู้ใช้ ฉันต้องการเพิ่มประวัติการใช้จ่ายใหม่ เพื่อที่จะติดตามประวัติการใช้จ่ายของฉัน
-#### Technical Details: EXP01
-* POST /expenses
-* Request Body
-```json
-{
-	"title": "strawberry smoothie",
-	"amount": 79,
-	"note": "night market promotion discount 10 bath", 
-	"tags": ["food", "beverage"]
-}
-```
-* Response Body
-```json
-{
-	"id": "1",
-	"title": "strawberry smoothie",
-	"amount": 79,
-	"note": "night market promotion discount 10 bath", 
-	"tags": ["food", "beverage"]
-}
-```
+Created by: 
 
-### Story: EXP02
-	* As a user, I want to see my expense by using expense ID So that I can check my expense information
-	* ในฐานะผู้ใช้ ฉันต้องการดูข้อมูลประวัติการใช้จ่ายของฉันโดยใช้รหัสประวัติการใช้จ่าย เพื่อที่จะตรวจสอบข้อมูลประวัติการใช้จ่ายของฉัน
-#### Technical Details: EXP02
-* GET /expenses/:id
-* :id = 1
-* Response Body
-```json
-{
-	"id": "1",
-	"title": "strawberry smoothie",
-	"amount": 79,
-	"note": "night market promotion discount 10 bath", 
-	"tags": ["food", "beverage"]
-}
-```
+Peemwaruch Intamool, intamoon.peem@gmail.com
 
 
-### Story: EXP03
-	* As a user, I want to update my expense So that I can correct my expense information
-	* ในฐานะผู้ใช้ ฉันต้องการปรับปรุงข้อมูลประวัติการใช้จ่ายของฉัน เพื่อที่จะแก้ไขข้อมูลประวัติการใช้จ่ายของฉัน
-#### Technical Details: EXP03
-* PUT /expenses/:id
-* :id = 1
-* Request Body
-```json
-{
-    "title": "apple smoothie",
-    "amount": 89,
-    "note": "no discount",
-    "tags": ["beverage"]
-}
-```
-* Response Body
-```json
-{
-		"id": "1",
-		"title": "apple smoothie",
-		"amount": 89,
-		"note": "no discount",
-		"tags": ["beverage"]
-}
-```
+## Setting up the environment
+Please check these requirements before running the program.
+* Set your `PORT` to `:2565`.
+* Set your `DATABASE_URL` to the URL of your Postgres database.
+* To run the integration tests, make sure your machine can run docker-compose.
 
-### Story: EXP04
-	* As a user, I want to see all my expenses So that I can check my expense information
-	* ในฐานะผู้ใช้ ฉันต้องการดูข้อมูลประวัติการใช้จ่ายทั้งหมดของฉัน เพื่อที่จะตรวจสอบข้อมูลประวัติการใช้จ่ายของฉัน
-#### Technical Details: EXP04
-* GET /expenses
-* Response Body
-```json
-[
-	{
-		"id": "1",
-		"title": "apple smoothie",
-		"amount": 89,
-		"note": "no discount",
-		"tags": ["beverage"]
-	},
-	{
-		"id": "2",
-		"title": "iPhone 14 Pro Max 1TB",
-		"amount": 66900,
-		"note": "birthday gift from my love", 
-		"tags": ["gadget"]
-	}
-]
-```
+## How to run the program
+* To run the main program: `DATABASE_URL=postgres://... PORT=:2565 go run server.go`
+* To run unit tests: `go test -v ./...`
+* To run the integration tests: `docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit --exit-code-from it_tests` 
 
-## Technical Requirements
-* ใช้ภาษา Go สำหรับการพัฒนา
-* ใช้ PostgreSQL สำหรับเก็บข้อมูล
-* ใช้ go module สำหรับการจัดการ package
-* ใช้ go 1.18 ขึ้นไป
-* ":2565" ใช้เป็น port ของ api server
-* ชื่อโปรเจคของคุณต้องเป็น *assessment*
-* ระบบต้องออกแบบตามมาตรฐาน REST API
+## Notes
 
-  - POST /expenses
-  - GET /expenses/:id
-  - PUT /expenses/:id
-  - GET /expenses
-
-## Hints
-- ทำทีละ story โดยเริ่มจาก story แรกแล้วทำเรียงตามลำดับ
-- `os.Getenv("PORT")` ใช้เพื่อรับค่า port จาก environment variable
-- `os.Getenv("DATABASE_URL")` ใช้เพื่อรับค่า database url จาก environment variable
-- เวลารัน `DATABASE_URL=postgres://... PORT=:2565 go run server.go`
-- `pq.Array(&tags)` is used to convert []string to postgres array
-- script to create table
-```sql
-	CREATE TABLE IF NOT EXISTS expenses (
-		id SERIAL PRIMARY KEY,
-		title TEXT,
-		amount FLOAT,
-		note TEXT,
-		tags TEXT[]
-	);
-```
-- example data
-```json
-{
-	"title": "buy a new phone",
-	"amount": 39000,
-	"note": "buy a new phone",
-	"tags": ["gadget", "shopping"]
-}
-```
-- example response
-```json
-{
-	"id": 1,
-	"title": "buy a new phone",
-	"amount": 39000,
-	"note": "buy a new phone",
-	"tags": ["gadget", "shopping"]
-}
-```
-
-## Acceptance Guidelines
-* Postman collection สำหรับทดสอบ API ทั้งหมดรันผ่าน
-	- หลังจาก import [postman collection](expenses.postman_collection.json) แล้ว อย่าลืมสร้าง postman environment สำหรับเก็บค่าตัวแปรเวลารัน Postman
-* กรณี success ต้อง response status code ให้เหมาะสม เช่น
-	- 201 StatusCreated
-	- 200 StatusOK
-* กรณี error ต่างๆ ให้ระบบ response status code ตามความเหมาะสม เช่น
-	- 400 StatusBadRequst
-	- 500 StatusInternalServerError
-* API server ควรจะรองรับ Graceful shutdown
-* โปรเจคควรรองรับการ build ด้วย docker โดยใช้ multi-stage build เพื่อสะดวกต่อการ deploy
-* มีการเขียน unit test, integration test
-	- สำหรับ integration test สามารถเทคนิค docker-compose testing sandbox ที่เรียนในรายวิชา devops สำหรับรัน postgres ได้เพื่อการทดสอบ
-* ซอร์สโค้ดควรจัดรูปแบบด้วย gofmt
-* ใช้ความรู้ทุกอย่างที่เรียนมาพร้อมด้วยสิ่งที่ศึกษาเพิ่มเติมเอง
-* แต่ละ story ควรใช้ branch ของตัวเองแล้ว merge กลับไปที่ main ด้วย 3-way merge
-![ตัวอย่าง](three-way-merge.png)
-
+* `Echo` library is used to implement APIs.
+* Authorization is handled by the middleware. Your request will be accept if and only if your request's header has the `Authorization` field with value `November 10, 2009` (as stated in the Postman tests.)
+* Each user story is created in its own branch. You can check with `git log --graph` afther cloning this project.
+* Expenses routes' logic is implemented in the `expenses` folder.
+* `db.go` contains code used to handle database connections.
+* `handler.go` contains all route handling functions.
+* `handler_it_test.go` consists of integration tests for each handler function and other files that end with `_test.go` are unit tests code.

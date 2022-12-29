@@ -62,6 +62,9 @@ func (handler Handler) CreateExpense(c echo.Context) error {
 	return c.JSON(http.StatusCreated, expense)
 }
 
+// GetExpenseByID handles HTTP GET request to get an expense by ID.
+// This function receives echo.Context as a parameter
+// and returns a JSON response with status code.
 func (handler Handler) GetExpenseByID(c echo.Context) error {
 
 	id := c.Param("id")
@@ -111,6 +114,9 @@ func (handler Handler) GetExpenseByID(c echo.Context) error {
 	}
 }
 
+// PutExpense handles HTTP PUT request to change the data of an expense by ID.
+// This function receives echo.Context as a parameter
+// and returns a JSON response with status code
 func (handler Handler) PutExpense(c echo.Context) error {
 
 	var expense Expense
@@ -123,14 +129,6 @@ func (handler Handler) PutExpense(c echo.Context) error {
 	}
 
 	id := c.Param("id")
-
-	// id_str := c.Param("id")
-	// id, err := strconv.Atoi(id_str)
-	// if err != nil {
-	// 	return c.JSON(http.StatusBadRequest,
-	// 		ErrorResponse{Message: "can't convert id to int" + err.Error()})
-	// }
-	// expense.ID = int(id)
 
 	stmt, err := handler.DB.Prepare(`
 		UPDATE expenses 
@@ -145,6 +143,7 @@ func (handler Handler) PutExpense(c echo.Context) error {
 
 	row := stmt.QueryRow(id, expense.Title, expense.Amount, expense.Note, pq.Array(expense.Tags))
 
+	// Postgres driver returns an array as []uint8
 	var tags []uint8
 
 	err = row.Scan(&expense.ID, &expense.Title, &expense.Amount, &expense.Note, &tags)
@@ -154,7 +153,6 @@ func (handler Handler) PutExpense(c echo.Context) error {
 	}
 
 	tagsString := string([]byte(tags))
-	// log.Println(tagsString)
 
 	if tagsString == "{}" || tagsString == "" {
 		expense.Tags = nil
@@ -166,6 +164,9 @@ func (handler Handler) PutExpense(c echo.Context) error {
 	return c.JSON(http.StatusOK, expense)
 }
 
+// GetAllExpenses handles HTTP GET request to get all expenses.
+// This function receives echo.Context as a parameter
+// and returns a JSON response with status code
 func (handler Handler) GetAllExpenses(c echo.Context) error {
 
 	stmt, err := handler.DB.
@@ -185,8 +186,11 @@ func (handler Handler) GetAllExpenses(c echo.Context) error {
 
 	var expenses []Expense
 
+	// Iterate all rows
 	for rows.Next() {
 		var expense Expense
+
+		// Postgres driver returns an array as []uint8
 		var tags []uint8
 
 		err = rows.Scan(&expense.ID, &expense.Title, &expense.Amount, &expense.Note, &tags)

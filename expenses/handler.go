@@ -167,5 +167,49 @@ func (handler Handler) PutExpense(c echo.Context) error {
 }
 
 func (handler Handler) GetAllExpenses(c echo.Context) error {
-	return nil
+
+	stmt, err := handler.DB.
+		Prepare("SELECT id, title, amount, note, tags FROM expenses")
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError,
+			ErrorResponse{"cannot prepare query statement. " + err.Error()})
+	}
+
+	rows, err := stmt.Query()
+
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError,
+			ErrorResponse{"cannot query expenses. " + err.Error()})
+	}
+
+	var expenses []Expense
+
+	for rows.Next() {
+		var expense Expense
+		var tags []uint8
+
+		err = rows.Scan(&expense.ID, &expense.Title, &expense.Amount, &expense.Note, &tags)
+
+		// Convert []uint8 to []string
+		// by converting []uint8 to bytes then
+		// trimming {}, lastly split by ","
+		tagsString := string([]byte(tags))
+
+		if tagsString == "{}" || tagsString == "" {
+			expense.Tags = nil
+		} else {
+			tagsString = strings.Trim(tagsString, "{}")
+			expense.Tags = strings.Split(tagsString, ",")
+		}
+
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError,
+				ErrorResponse{"cannot scan result into variable. " + err.Error()})
+		}
+
+		expenses = append(expenses, expense)
+	}
+
+	return c.JSON(http.StatusOK, expenses)
 }

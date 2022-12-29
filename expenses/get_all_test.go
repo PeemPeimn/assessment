@@ -23,10 +23,7 @@ func TestGetAllExpenses(t *testing.T) {
 		AddRow(1, "smoothie", 79, "unit_test", `{food,beverage}`).
 		AddRow(2, "latte", 88, "unit_test", `{coffee,drink}`)
 
-	expected := `[
-		{"id":1,"title":"smoothie","amount":79,"note":"unit_test","tags":["food","beverage"]},
-		{"id":2,"title":"latte","amount":88,"note":"unit_test","tags":["coffee","drink"]}
-		]`
+	expected := `[{"id":1,"title":"smoothie","amount":79,"note":"unit_test","tags":["food","beverage"]},{"id":2,"title":"latte","amount":88,"note":"unit_test","tags":["coffee","drink"]}]`
 
 	mock.ExpectPrepare("SELECT (.+) FROM expenses").
 		ExpectQuery().
@@ -46,5 +43,5 @@ func TestGetAllExpenses(t *testing.T) {
 
 	// Assert
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Equal(t, strings.TrimSpace(expected), strings.TrimSpace(rec.Body.String()))
+	assert.Equal(t, expected, strings.TrimSpace(rec.Body.String()))
 }

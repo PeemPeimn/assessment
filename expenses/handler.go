@@ -165,3 +165,7 @@ func (handler Handler) PutExpense(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, expense)
 }
+
+func (handler Handler) GetAllExpenses(c echo.Context) error {
+	return nil
+}

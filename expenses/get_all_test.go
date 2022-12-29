@@ -45,3 +45,34 @@ func TestGetAllExpenses(t *testing.T) {
 	assert.Equal(t, http.StatusOK, rec.Code)
 	assert.Equal(t, expected, strings.TrimSpace(rec.Body.String()))
 }
+
+func TestGetAllExpensesEmpty(t *testing.T) {
+	// Arrange
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+
+	newsMockRows := sqlmock.
+		NewRows([]string{"id", "title", "amount", "note", "tags"})
+
+	mock.ExpectPrepare("SELECT (.+) FROM expenses").
+		ExpectQuery().
+		WillReturnRows(newsMockRows)
+
+	req := httptest.NewRequest(http.MethodGet, "/expenses", nil)
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+
+	e := echo.New()
+	c := e.NewContext(req, rec)
+
+	handler := Handler{DB: db}
+
+	// Act
+	handler.GetAllExpenses(c)
+
+	// Assert
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "null", strings.TrimSpace(rec.Body.String()))
+}
